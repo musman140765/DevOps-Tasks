@@ -1,0 +1,32 @@
+---
+- name: Backup Logs
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Install required packages
+      package:
+        name:
+          - gzip
+          - cron
+          - tar
+        state: present
+
+    - name: Ensure /backups directory exists
+      file:
+        path: /backups
+        state: directory
+
+    - name: Copy backup script to target host
+      copy:
+        src: "backup.sh"
+        dest: "/home/ubuntu/"
+
+    - name: Schedule cron job for hourly backups
+      cron:
+        name: "Backup at every hour"
+        job: "/home/ubuntu/backup.sh"
+        hour: "*"
+        minute: "0"
+        user: ubuntu
+
